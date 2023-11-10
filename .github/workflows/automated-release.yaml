@@ -10,33 +10,42 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+        run: |
+          gh release create "$tag" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
+              --generate-notes
     # - uses: actions/checkout@v3
     # - uses: ncipollo/release-action@v1
 
-    - name: Checkout code
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+    # - name: Checkout code
+    #   uses: actions/checkout@v3
+    #   with:
+    #     fetch-depth: 0
 
-    - name: Get Previous Tag
-      run: |
-        PREV_TAG=$(git describe --abbrev=0 --tags "${{ github.ref }}^")
-        echo "::set-env name=baseRef::$PREV_TAG"
+    # - name: Get Previous Tag
+    #   run: |
+    #     PREV_TAG=$(git describe --abbrev=0 --tags "${{ github.ref }}^")
+    #     echo "::set-env name=baseRef::$PREV_TAG"
 
-    - name: Generate Changelog
-      id: generate_changelog
-      uses: nblagoev/pull-release-notes-action@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        base-ref: ${{ env.baseRef }}
-        head-ref: ${{ github.ref }}
+    # - name: Generate Changelog
+    #   id: generate_changelog
+    #   uses: nblagoev/pull-release-notes-action@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     base-ref: ${{ env.baseRef }}
+    #     head-ref: ${{ github.ref }}
 
-    - name: Create Release
-      uses: actions/create-release@v1.0.2
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        body: ${{steps.generate_changelog.outputs.result}}
+    # - name: Create Release
+    #   uses: actions/create-release@v1.0.2
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     tag_name: ${{ github.ref }}
+    #     release_name: Release ${{ github.ref }}
+    #     body: ${{steps.generate_changelog.outputs.result}}
